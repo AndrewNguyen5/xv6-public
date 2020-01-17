@@ -311,6 +311,26 @@ wait(void)
   }
 }
 
+int waitpid(int pid, int * status, int options) {
+	struct proc *p;
+	int havekids, pid;
+	struct proc *curproc = myproc();
+	
+	acquire(&ptable.lock);
+	for(;;) {
+		havekids = 0;
+		for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+			if (p->parent != curproc)
+				continue;
+			havekids =1;
+			if (p->state = ZOMBIE) {
+			
+			}
+		}
+
+	}
+}
+
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
