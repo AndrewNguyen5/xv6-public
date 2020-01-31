@@ -225,12 +225,12 @@ fork(void)
 // An exited process remains in the zombie state
 // until its parent calls wait() to find out it exited.
 void
-exit(int status)
+exit(int stat)
 {
   struct proc *curproc = myproc();
   struct proc *p;
   int fd;
-
+  curproc->status = stat;
   if(curproc == initproc)
     panic("init exiting");
 
@@ -332,6 +332,9 @@ int waitpid(int pid, int *stat, int options)
       havekids = 1;
       if(p->state == ZOMBIE){
         // Found one.
+	if (stat) {
+	 *stat = p->status;
+	}
         pid2 = p->pid;
         kfree(p->kstack);
         p->kstack = 0;
@@ -358,9 +361,6 @@ int waitpid(int pid, int *stat, int options)
     sleep(curproc, &ptable.lock);  //DOC: wait-sleep
   }
 }
-
-
-
 
 
 //PAGEBREAK: 42
