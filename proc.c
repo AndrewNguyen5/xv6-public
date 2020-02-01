@@ -230,7 +230,8 @@ exit(int stat)
   struct proc *curproc = myproc();
   struct proc *p;
   int fd;
-  curproc->status = stat;
+  //curproc->status = stat;
+
   if(curproc == initproc)
     panic("init exiting");
 
@@ -263,6 +264,7 @@ exit(int stat)
 
   // Jump into the scheduler, never to return.
   curproc->state = ZOMBIE;
+  curproc->status = stat;
   sched();
   panic("zombie exit");
 }
@@ -316,10 +318,10 @@ int wait(int *stat)
 
 // Wait for a child process to exit and return its pid.
 // Return -1 if this process has no children.
-int waitpid(int pid, int *stat, int options)
+int waitpid(int pid2, int *stat, int options)
 {
   struct proc *p;
-  int havekids, pid2;
+  int havekids, pid;
   struct proc *curproc = myproc();
   
   acquire(&ptable.lock);
@@ -327,7 +329,7 @@ int waitpid(int pid, int *stat, int options)
     // Scan through table looking for exited children.
     havekids = 0;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->pid != pid)
+      if(p->pid != pid2)
         continue;
       havekids = 1;
       if(p->state == ZOMBIE){
@@ -335,7 +337,7 @@ int waitpid(int pid, int *stat, int options)
 	if (stat) {
 	 *stat = p->status;
 	}
-        pid2 = p->pid;
+        pid = p->pid;
         kfree(p->kstack);
         p->kstack = 0;
         freevm(p->pgdir);
@@ -345,7 +347,7 @@ int waitpid(int pid, int *stat, int options)
         p->killed = 0;
         p->state = UNUSED;
         release(&ptable.lock);
-        return pid2;
+        return pid;
       }
     }
 
@@ -354,9 +356,7 @@ int waitpid(int pid, int *stat, int options)
       release(&ptable.lock);
       return -1;
     }
-    //else if (stat) {
-    //  stat = p->status;
-    //}
+
     // Wait for children to exit.  (See wakeup1 call in proc_exit.)
     sleep(curproc, &ptable.lock);  //DOC: wait-sleep
   }
