@@ -104,7 +104,7 @@ int sys_waitpid(void)
   
   argint(0, &pid);
 
-  if (argptr(0,(void *)&status, sizeof(*status))<0) {
+  if (argptr(1,(void *)&status, sizeof(*status))<0) {
     return -1;
   }
 
