@@ -112,6 +112,8 @@ found:
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
 
+  p->priority = 31;
+
   return p;
 }
 
@@ -378,6 +380,7 @@ scheduler(void)
   struct cpu *c = mycpu();
   c->proc = 0;
 
+  struct proc *p2;
   struct proc *first = ptable.proc;
   int min = 31;
 
@@ -387,10 +390,13 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
+
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if (p->priority < min) {
-	min = p->priority;
-	first = p;
+      for(p2 = ptable.proc; p2 < &ptable.proc[NPROC]; p2++) {
+        if(p2->priority < min) {
+	  min = p2->priority;
+	  first = p2;
+        }
       }
       if(first->state != RUNNABLE)
         continue;
@@ -440,6 +446,11 @@ sched(void)
   mycpu()->intena = intena;
 }
 
+int setpriority(int prio){
+  struct proc *p = myproc();
+  p->priority = prio;
+  return prio;
+}
 // Give up the CPU for one scheduling round.
 void
 yield(void)
