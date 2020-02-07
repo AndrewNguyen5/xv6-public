@@ -381,9 +381,9 @@ scheduler(void)
   c->proc = 0;
 
   struct proc *first = ptable.proc;
-  int min = 31;
 
   for(;;){
+    int min = 31;
     // Enable interrupts on this processor.
     sti();
 
