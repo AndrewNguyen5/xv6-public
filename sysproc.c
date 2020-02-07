@@ -110,3 +110,13 @@ int sys_waitpid(void)
 
   return waitpid(pid, status, 0);
 }
+
+int sys_setpriority(void)
+{
+
+  int priority;
+
+  argint(0, &priority);
+
+  return setpriority(priority);
+}
