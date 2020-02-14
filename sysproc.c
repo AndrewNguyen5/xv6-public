@@ -114,9 +114,8 @@ int sys_waitpid(void)
 int sys_setpriority(void)
 {
 
-  int priority;
+  int priority = 10;
 
   argint(0, &priority);
 
-  return setpriority(priority);
-}
+  return setpriority(priority);}
