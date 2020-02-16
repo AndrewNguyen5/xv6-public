@@ -390,6 +390,12 @@ scheduler(void)
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+      if(p->priority > 0 && p->pid > 2) {
+	p->priority--;
+	cprintf("Child #%d has waited with priority: %d\n", p->pid, p->priority);
+      }
+    }
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
       if(p->priority <= min && p->state == RUNNABLE) {
 	min = p->priority;
 	first = p;
@@ -405,16 +411,18 @@ scheduler(void)
       c->proc = first;
       switchuvm(first);
       first->state = RUNNING;
-
+    
       swtch(&(c->scheduler), first->context);
       switchkvm();
-
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       c->proc = 0;
+      if(first->priority < 31 && p->pid > 2) {
+	first->priority++;
+	cprintf("Child #%d has aged with priority: %d\n", first->pid, first->priority);
+      }
     }
     release(&ptable.lock);
-
   }
 }
 
